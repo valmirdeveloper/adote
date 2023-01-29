@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.messages import constants
 
 def cadastro(request):
     if request.method == "GET":
@@ -11,11 +14,26 @@ def cadastro(request):
         confirmar_senha = request.POST.get('confirmar_senha')
         
         if len(nome.strip()) == 0 or len(email.strip()) == 0 or len(senha.strip()) == 0 or len(confirmar_senha.strip()) == 0:
+            messages.add_message(request, constants.ERROR, 'Preencha todos os campos')
             return render(request, 'cadastro.html')
 
         if senha != confirmar_senha:
+            messages.add_message(request, constants.ERROR, 'Digite duas senhas iguais')
             return render(request, 'cadastro.html')
+
+        try:
+            user = User.objects.create_user(
+            username=nome,
+            email=email,
+            password=senha
+            )
+            messages.add_message(request, constants.SUCCESS, 'Usuário criado com sucesso')
+            return render(request, 'cadastro.html')
+            messages.add_message(request, constants.ERROR, 'Erro interno do sistema')
+        except:
+            return render(request, 'cadastro.html')
+
               
-        return HttpResponse(f'{nome}, {email}, {senha}, {confirmar_senha}')
+      
   
       
